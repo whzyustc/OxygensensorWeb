@@ -9,8 +9,8 @@ module.exports={
 
 
     output:{
-        filename:"[name].js",
-        path:path.resolve(__dirname,'dist')
+        filename:"[name].[hash:8].js",
+        path:path.resolve(__dirname+'/../OxygenSensorServer','dist')
     },
 
     devtool:'source-map',
