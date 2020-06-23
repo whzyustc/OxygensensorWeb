@@ -23,9 +23,10 @@ function getdata(callback:any):any
 }
 
 window.onload=function(){
-    var ans:any=1000;
+    var ans:any;
     getdata(function(data:any){
         ans=JSON.parse(data);
+        console.log(ans.constructor==Array);
         /*console.log(ans.id);
         console.log(ans.oxygenValue);
         console.log(ans.date);*/
@@ -33,12 +34,11 @@ window.onload=function(){
             <Tubiao  arr={ans}/>,
             document.getElementById("example")
         );
-    });
-    
+        
     var mycanvas:HTMLCanvasElement=document.getElementById('myChart') as HTMLCanvasElement;
     var ctx:any =mycanvas.getContext('2d');
 
-    var data={
+    var dataset={
         labels:ans.map((ele:any)=>ele.date),
         datasets:[
             {
@@ -49,17 +49,37 @@ window.onload=function(){
             pointStrokeColor: "#fff",
             pointHighlightFill: "#fff",
             pointHighlightStroke: "rgba(220,220,220,1)",
-            data: ans.map((ele:any)=>ele.oxygenValue)
+            data: ans.map((ele:any)=>{return {x:ele.date,y:ele.oxygenValue}})
             }
         ]
 
     }
-    var opttion={};
+    var option={
+        scales: {
+        yAxes: [{
+            ticks: {
+                max: 1000,
+                min: 200,
+                stepSize: 100
+            }
+        }],
+
+        xAxes: [{
+            type: 'time',
+            time: {
+                displayFormats: {
+                    quarter: 'h:mm:ss a'
+                }
+            }
+        }]
+    }};
     var myChart=new Chart(ctx,{
         type:'line',
-        data:data,
-        options:{}
+        data:dataset,
+        options:option
     })
+    });
+    
 
 }
 

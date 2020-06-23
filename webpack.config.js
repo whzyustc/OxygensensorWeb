@@ -15,6 +15,8 @@ module.exports={
 
     devtool:'source-map',
 
+    externals:["react"]
+
     resolve:{
         modules:["node_modules"],
         alias:{
@@ -94,8 +96,55 @@ module.exports={
         hot:true,
         overlay:true,
         //host:"0.0.0.0",
-        index:"./index.html"
+        index:"./index.html",
+        before:function(app){
+            const bodyParser=require('body-parser');
+            const moment= require('moment');
 
+            const mysql=require('mysql');
+            const connection = mysql.createConnection({
+                host:'localhost',
+                user:'oxygensensor',
+                password:'\$Ano2012',
+                database:'oxygencon'
+            })
+            
+            connection.connect();
+
+            app.use(bodyParser.json());
+            app.use(bodyParser.urlencoded({ extended: false }));
+
+            
+            app.get('/last60s',function(req,res){
+                connection.query(`select * from test2 order by date desc limit 100 `,function(err,results,fields){
+                    if (err) throw err;
+                    console.log(results);
+                    res.send(results);
+                });
+            })
+
+            app.get('/datafromdate',function(req,res){
+                connection.query(`select * from test2 limit 100 `,function(err,results,fields){
+                    if (err) throw err;
+                    console.log(results[0]);
+                    res.send(results[0]);
+                });
+            })
+
+            app.post('/post',function(req,res){
+                
+                let current_time =  moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+                connection.query(`insert into test2
+                    (date,oxygenValue)
+                    values
+                    ("${current_time}",${req.body.hello.substring(0,3)})
+                    ;`);
+                res.send("post success");
+                console.log(req.body);
+
+            })
+
+        }
     }
 
 
