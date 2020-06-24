@@ -1,6 +1,8 @@
 const path=require('path');
 
 const HtmlWebpackPlugin =require('html-webpack-plugin');
+const WebpackSftpClient =require('webpack-sftp-client');
+const {CleanWebpackPlugin} =require('clean-webpack-plugin');
 
 module.exports={
     entry:{
@@ -10,12 +12,12 @@ module.exports={
 
     output:{
         filename:"[name].[hash:8].js",
-        path:path.resolve(__dirname+'/../OxygenSensorServer','dist')
+        path:path.resolve(__dirname,'dist')
     },
 
     devtool:'source-map',
 
-    externals:["react"]
+    //externals:["react"],
 
     resolve:{
         modules:["node_modules"],
@@ -72,12 +74,22 @@ module.exports={
     
     plugins:[
         //详细plugins配置
+        new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             title:'index',
             filename:'index.html',
             template:"./src/pages/index/index.html",
             chunks:['index']
             
+        }),
+        new WebpackSftpClient({
+            port:"22",
+            host:'139.9.181.83',
+            username:'root',
+            password:"1332903Sc",
+            path:"./dist/",
+            remotePath:'/root/JSworkspace/OxygenSensorServer/dist/',
+            verbose:true
         })
         
         // new HtmlWebpackPlugin({
@@ -97,54 +109,54 @@ module.exports={
         overlay:true,
         //host:"0.0.0.0",
         index:"./index.html",
-        before:function(app){
-            const bodyParser=require('body-parser');
-            const moment= require('moment');
+        // before:function(app){
+        //     const bodyParser=require('body-parser');
+        //     const moment= require('moment');
 
-            const mysql=require('mysql');
-            const connection = mysql.createConnection({
-                host:'localhost',
-                user:'oxygensensor',
-                password:'\$Ano2012',
-                database:'oxygencon'
-            })
+        //     const mysql=require('mysql');
+        //     const connection = mysql.createConnection({
+        //         host:'139.9.181.83:3306',
+        //         user:'oxygensensor',
+        //         password:'\$Ano2012',
+        //         database:'oxygencon'
+        //     })
             
-            connection.connect();
+        //     connection.connect();
 
-            app.use(bodyParser.json());
-            app.use(bodyParser.urlencoded({ extended: false }));
+        //     app.use(bodyParser.json());
+        //     app.use(bodyParser.urlencoded({ extended: false }));
 
             
-            app.get('/last60s',function(req,res){
-                connection.query(`select * from test2 order by date desc limit 100 `,function(err,results,fields){
-                    if (err) throw err;
-                    console.log(results);
-                    res.send(results);
-                });
-            })
+        //     app.get('/last60s',function(req,res){
+        //         connection.query(`select * from test2 order by date desc limit 100 `,function(err,results,fields){
+        //             if (err) throw err;
+        //             console.log(results);
+        //             res.send(results);
+        //         });
+        //     })
 
-            app.get('/datafromdate',function(req,res){
-                connection.query(`select * from test2 limit 100 `,function(err,results,fields){
-                    if (err) throw err;
-                    console.log(results[0]);
-                    res.send(results[0]);
-                });
-            })
+        //     app.get('/datafromdate',function(req,res){
+        //         connection.query(`select * from test2 limit 100 `,function(err,results,fields){
+        //             if (err) throw err;
+        //             console.log(results[0]);
+        //             res.send(results[0]);
+        //         });
+        //     })
 
-            app.post('/post',function(req,res){
+        //     app.post('/post',function(req,res){
                 
-                let current_time =  moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
-                connection.query(`insert into test2
-                    (date,oxygenValue)
-                    values
-                    ("${current_time}",${req.body.hello.substring(0,3)})
-                    ;`);
-                res.send("post success");
-                console.log(req.body);
+        //         let current_time =  moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+        //         connection.query(`insert into test2
+        //             (date,oxygenValue)
+        //             values
+        //             ("${current_time}",${req.body.hello.substring(0,3)})
+        //             ;`);
+        //         res.send("post success");
+        //         console.log(req.body);
 
-            })
+        //     })
 
-        }
+        // }
     }
 
 
