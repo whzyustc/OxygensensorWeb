@@ -1,7 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-
-import Tubiao from "../../component/tubiao"
+// import React from 'react';
+// import ReactDOM from 'react-dom';
+import Chart from 'chart.js'
 
 function getdata(callback:any):any
 {
@@ -30,7 +29,6 @@ function updatedata(callback:any):any
     xmlhttp.onreadystatechange=function(){
         if (xmlhttp.readyState==4 && xmlhttp.status==200)
         {
-            //console.log(xmlhttp.responseText);
             callback(xmlhttp.responseText);
         }
     }
@@ -40,32 +38,60 @@ function updatedata(callback:any):any
 
 var sit;
 var count=1;
+var mycanvas:HTMLCanvasElement=document.getElementById('myChart') as HTMLCanvasElement;
+var ctx:any =mycanvas.getContext('2d');
+var oxygendata:number[]=[];
+ var dataset={
+        datasets:[
+            {
+            label: "OxygenConsentration",
+            fillColor: "rgba(220,220,220,0.2)",
+            strokeColor: "rgba(220,220,220,1)",
+            pointColor: "rgba(220,220,220,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(220,220,220,1)",
+            data: oxygendata
+            }
+        ]
+
+    }
+    var option={
+        scales: {
+        yAxes: [{
+            ticks: {
+                max: 1000,
+                min: 200,
+                stepSize: 100
+            }
+        }],
+
+        xAxes: [{
+            type: 'time',
+            time: {
+                displayFormats: {
+                    quarter: 'h:mm:ss a'
+                }
+            }
+        }]
+    }};
 window.onload=function(){
     var ans:any;
+    var myChart=new Chart(ctx,{
+        type:'line',
+        data:dataset,
+        options:option
+    })
     getdata(function(data:any){
         ans=JSON.parse(data);
-        console.log(ans.constructor==Array);
-        /*console.log(ans.id);
-        console.log(ans.oxygenValue);
-        console.log(ans.date);*/
-        ReactDOM.render(
-            <Tubiao  arr={ans} sqlid={1}/>,
-            document.getElementById("example")
-        );
+        dataset.datasets[0].data=ans.map((item: { date: any; oxygenValue: any; })=>{return {x:item.date,y:item.oxygenValue}})
+        myChart.update();
     });
     setInterval(function(){
         getdata(function(data:any){
         ans=JSON.parse(data);
-        /*ans=ans.concat(JSON.parse(data));
-        while (ans.length>60)
-        {
-            ans.shift();
-        }*/
-        /*ReactDOM.render(
-            
-            <Tubiao  arr={ans} sqlid={++count}/>,
-            document.getElementById("example")
-        )*/
+        dataset.datasets[0].data=ans.map((item: { date: any; oxygenValue: any; })=>{return {x:item.date,y:item.oxygenValue}})
+        myChart.update();
     })
     },2000)
 }

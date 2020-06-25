@@ -69,7 +69,7 @@ module.exports={
     //     "react-dom":"ReactDOM"
     // },
 
-    mode: 'development',
+    mode: 'production',
     
     
     plugins:[
