@@ -1,6 +1,7 @@
 // import React from 'react';
 // import ReactDOM from 'react-dom';
 import Chart from 'chart.js'
+import {  } from 'jquery';
 
 function getdata(callback:any):any
 {
@@ -44,7 +45,7 @@ var oxygendata:number[]=[];
  var dataset={
         datasets:[
             {
-            label: "OxygenConsentration",
+            label: "OxygenConcentration",
             fillColor: "rgba(220,220,220,0.2)",
             strokeColor: "rgba(220,220,220,1)",
             pointColor: "rgba(220,220,220,1)",
@@ -57,6 +58,7 @@ var oxygendata:number[]=[];
 
     }
     var option={
+        
         scales: {
         yAxes: [{
             ticks: {
@@ -73,7 +75,11 @@ var oxygendata:number[]=[];
                     quarter: 'h:mm:ss a'
                 }
             }
-        }]
+        }],
+        animation:{
+            duration:0
+        }
+
     }};
 window.onload=function(){
     var ans:any;
@@ -93,7 +99,7 @@ window.onload=function(){
         dataset.datasets[0].data=ans.map((item: { date: any; oxygenValue: any; })=>{return {x:item.date,y:item.oxygenValue}})
         myChart.update();
     })
-    },2000)
+    },1000)
 }
 
 
