@@ -1,10 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-
-import {Tubiao} from "../../component/tubiao"
 import  Chart  from "chart.js";
-
-function getdata(callback:any):any
+interface IData{
+    id:number;
+    date:string;
+    oxygenValue:number;
+}
+function getdata(router:string,callback:any):any
 {
     var xmlhttp:any;
     if (window.XMLHttpRequest)
@@ -18,23 +18,20 @@ function getdata(callback:any):any
             callback(xmlhttp.responseText);
         }
     }
-    xmlhttp.open("GET","last60s",true);
+    xmlhttp.open("GET",router,true);
     xmlhttp.send();
 }
 
 window.onload=function(){
-    var ans:any;
-    getdata(function(data:any){
+    var ans:IData[];
+    var timer:any;
+    var lastid:number;
+    getdata("last60s",function(data:string){
         ans=JSON.parse(data);
+
         console.log(ans.constructor==Array);
-        /*console.log(ans.id);
-        console.log(ans.oxygenValue);
-        console.log(ans.date);*/
-        ReactDOM.render(
-            <Tubiao  arr={ans}/>,
-            document.getElementById("example")
-        );
-        
+            
+        lastid=ans[ans.length-1].id;
     var mycanvas:HTMLCanvasElement=document.getElementById('myChart') as HTMLCanvasElement;
     var ctx:any =mycanvas.getContext('2d');
 
@@ -73,13 +70,33 @@ window.onload=function(){
             }
         }]
     }};
+
     var myChart=new Chart(ctx,{
         type:'line',
         data:dataset,
         options:option
     })
+
+    timer=setInterval(getdata("datafromid",function(data:string){
+
+        let tmp:IData[]=JSON.parse(data);
+        if (tmp.length>0)
+        {
+            
+        lastid=tmp[tmp.length-1].id;
+        console.log(lastid);
+        tmp.map(value=>{
+            ans.push(value);
+            dataset.labels.push(value.date);
+            dataset.datasets[0].data.push({x:value.date,y:value.oxygenValue});
+        });
+        myChart.update();
+
+        }
+    }),1000)
     });
     
+
 
 }
 
