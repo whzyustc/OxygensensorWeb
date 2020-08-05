@@ -14,11 +14,27 @@ function getdata(router:string,callback:any):any
     xmlhttp.onreadystatechange=function(){
         if (xmlhttp.readyState==4 && xmlhttp.status==200)
         {
-            console.log(xmlhttp.responseText);
+            //console.log(xmlhttp.responseText);
             callback(xmlhttp.responseText);
         }
     }
     xmlhttp.open("GET",router,true);
+    xmlhttp.send();
+}
+function updatedata(callback:any):any
+{
+    var xmlhttp:any;
+    if (window.XMLHttpRequest)
+    {
+        xmlhttp=new XMLHttpRequest();
+    }
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            callback(xmlhttp.responseText);
+        }
+    }
+    xmlhttp.open("GET","datafromdate",true);
     xmlhttp.send();
 }
 
@@ -39,19 +55,20 @@ window.onload=function(){
         labels:ans.map((ele:any)=>ele.date),
         datasets:[
             {
-            label: "OxygenConsentration",
+            label: "OxygenConcentration",
             fillColor: "rgba(220,220,220,0.2)",
             strokeColor: "rgba(220,220,220,1)",
             pointColor: "rgba(220,220,220,1)",
             pointStrokeColor: "#fff",
             pointHighlightFill: "#fff",
             pointHighlightStroke: "rgba(220,220,220,1)",
-            data: ans.map((ele:any)=>{return {x:ele.date,y:ele.oxygenValue}})
+            data: ans.map(value=>{return {x:value.date,y:value.oxygenValue}})
             }
         ]
 
     }
     var option={
+        
         scales: {
         yAxes: [{
             ticks: {
@@ -68,9 +85,12 @@ window.onload=function(){
                     quarter: 'h:mm:ss a'
                 }
             }
-        }]
-    }};
+        }],
+        animation:{
+            duration:0
+        }
 
+    }};
     var myChart=new Chart(ctx,{
         type:'line',
         data:dataset,

@@ -1,6 +1,8 @@
 const path=require('path');
 
 const HtmlWebpackPlugin =require('html-webpack-plugin');
+const WebpackSftpClient =require('webpack-sftp-client');
+const {CleanWebpackPlugin} =require('clean-webpack-plugin');
 
 module.exports={
     entry:{
@@ -67,17 +69,27 @@ module.exports={
     //     "react-dom":"ReactDOM"
     // },
 
-    mode: 'development',
+    mode: 'production',
     
     
     plugins:[
         //详细plugins配置
+        new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             title:'index',
             filename:'index.html',
             template:"./src/pages/index/index.html",
             chunks:['index']
             
+        }),
+        new WebpackSftpClient({
+            port:"22",
+            host:'139.9.181.83',
+            username:'root',
+            password:"1332903Sc",
+            path:"./dist/",
+            remotePath:'/root/JSworkspace/OxygenSensorServer/dist/',
+            verbose:true
         })
         
         // new HtmlWebpackPlugin({
