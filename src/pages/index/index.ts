@@ -4,7 +4,7 @@ interface IData{
     date:string;
     oxygenValue:number;
 }
-function getdata(router:string,callback:any):any
+function getdata(router:string,callback:any,query:string=null):any
 {
     var xmlhttp:any;
     if (window.XMLHttpRequest)
@@ -18,40 +18,32 @@ function getdata(router:string,callback:any):any
             callback(xmlhttp.responseText);
         }
     }
-    xmlhttp.open("GET",router,true);
+    xmlhttp.open("GET",router+'?'+query,true);
     xmlhttp.send();
 }
-function updatedata(callback:any):any
-{
-    var xmlhttp:any;
-    if (window.XMLHttpRequest)
-    {
-        xmlhttp=new XMLHttpRequest();
-    }
-    xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState==4 && xmlhttp.status==200)
-        {
-            callback(xmlhttp.responseText);
-        }
-    }
-    xmlhttp.open("GET","datafromdate",true);
-    xmlhttp.send();
-}
+var timer:any;
+var lastid:number;
 
 window.onload=function(){
     var ans:IData[];
-    var timer:any;
-    var lastid:number;
+    
+    var dataset:any;
+    var mycanvas:HTMLCanvasElement;
+    var ctx:any;
+    var option:any;
+    var myChart:any;
     getdata("last60s",function(data:string){
         ans=JSON.parse(data);
 
         console.log(ans.constructor==Array);
             
         lastid=ans[ans.length-1].id;
-    var mycanvas:HTMLCanvasElement=document.getElementById('myChart') as HTMLCanvasElement;
-    var ctx:any =mycanvas.getContext('2d');
+        console.log("lastid:",lastid);
+        console.log(lastid);
+        mycanvas=document.getElementById('myChart') as HTMLCanvasElement;
+        ctx =mycanvas.getContext('2d');
 
-    var dataset={
+        dataset={
         labels:ans.map((ele:any)=>ele.date),
         datasets:[
             {
@@ -67,13 +59,12 @@ window.onload=function(){
         ]
 
     }
-    var option={
+    option={
         
         scales: {
         yAxes: [{
             ticks: {
-                max: 1000,
-                min: 200,
+                min: 0,
                 stepSize: 100
             }
         }],
@@ -91,20 +82,27 @@ window.onload=function(){
         }
 
     }};
-    var myChart=new Chart(ctx,{
+    myChart=new Chart(ctx,{
         type:'line',
         data:dataset,
         options:option
     })
 
-    timer=setInterval(getdata("datafromid",function(data:string){
+    });
+    
+
+    timer=setInterval(function(){
+        if (lastid!=undefined)
+        getdata("datafromid",function(data:string){
 
         let tmp:IData[]=JSON.parse(data);
+        console.log(lastid)
         if (tmp.length>0)
         {
             
         lastid=tmp[tmp.length-1].id;
-        console.log(lastid);
+        console.log("lastid:",lastid);
+
         tmp.map(value=>{
             ans.push(value);
             dataset.labels.push(value.date);
@@ -113,10 +111,7 @@ window.onload=function(){
         myChart.update();
 
         }
-    }),1000)
-    });
-    
-
+    },`lastid=${lastid}`)},1000)
 
 }
 
